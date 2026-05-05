@@ -14,6 +14,7 @@
   <a href="docs/SECURITY_WHITEPAPER.md">🔐 Security</a> ·
   <a href="docs/COMMERCIAL.md">💳 Commercial</a> ·
   <a href="docs/PRIVACY.md">🛡️ Privacy</a> ·
+  <a href="docs/TERMS.md">📜 Terms</a> ·
   <a href="https://codefly.run/support">💬 Support</a>
 </p>
 
@@ -86,6 +87,7 @@ CodeFly cannot access any data transmitted between the host and phone, and does 
 - [Advanced Configuration](docs/ADVANCED.md): host settings, listener addresses, certificate management, and binding removal.
 - [Commercial Model](docs/COMMERCIAL.md): Relay subscription model, trials, and availability.
 - [Privacy](docs/PRIVACY.md): data processing, deletion, and retention model.
+- [Terms of Service](docs/TERMS.md): product terms for Direct Mode, self-hosted reachability, CodeFly Relay, billing, and acceptable use.
 
 ## 🧭 How CodeFly Works
 
