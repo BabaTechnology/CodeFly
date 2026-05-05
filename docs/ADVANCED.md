@@ -7,16 +7,25 @@ Most users should use the interactive `codefly` menu. This document covers host 
 Use these variables when the default Direct Mode address or port is not enough.
 
 ```bash
-HOST_CLIENT_BIND=0.0.0.0
+HOST_CLIENT_BIND=0.0.0.0, ::
 HOST_CLIENT_PORT=7788
 HOST_CLIENT_DIRECT_PUBLIC_HOST=host.example.com
 ```
 
-- `HOST_CLIENT_BIND`: local bind address for the host service.
+- `HOST_CLIENT_BIND`: comma-separated local listen addresses for the host service. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or explicit addresses for selected interfaces.
 - `HOST_CLIENT_PORT`: Direct Mode port, default `7788`.
 - `HOST_CLIENT_DIRECT_PUBLIC_HOST`: host name or IP address shown to the mobile app during Direct pairing.
 
 `HOST_CLIENT_DIRECT_PUBLIC_HOST` should be reachable from the phone. It can be a local IP address, VPN address, tunnel hostname, private overlay address, or other user-managed network endpoint.
+
+The same settings can be managed from the interactive menu:
+
+```text
+1. Manage local direct connection
+3. Manage service address and port
+```
+
+This is one of the most important Direct Mode settings. The host must listen on the correct local interface, and the QR code must advertise an address the phone can reach. When creating a Direct binding, CodeFly lists usable candidates from the configured public host, configured listen addresses, and detected local network interfaces. Choose the address that is reachable from the phone for that pairing.
 
 ## Host Data And Workspace
 
@@ -44,7 +53,7 @@ Supported values:
 - `codex`: use Codex only.
 - `claude`: use Claude Code only.
 
-CodeFly expects provider tools to be installed and signed in on the host computer. Provider accounts, configuration, sandbox behavior, and session history remain provider-native.
+CodeFly expects provider tools to be installed and signed in on the host computer, or configured with a usable API key. Provider accounts, configuration, sandbox behavior, and session history remain provider-native.
 
 ## Network Paths Without CodeFly Relay
 
@@ -84,7 +93,7 @@ What do you want to do?
 3. Manage security certificate
 ```
 
-The CLI shows the certificate path, key path, host public key fingerprint, and certificate fingerprint. If you change the certificate path, restart the host service for the change to take effect.
+The CLI shows and manages the certificate path, key path, host public key fingerprint, and certificate fingerprint. If you change the certificate path, restart the host service for the change to take effect.
 
 For Direct Mode, make sure the host firewall allows inbound traffic on `HOST_CLIENT_PORT`.
 
@@ -124,11 +133,19 @@ Then choose:
 
 Select the numbered Relay binding to remove. Removing it from the host stops this host from using that Relay binding.
 
+When CodeFly Relay is used, removing a binding from either the host side or the mobile side is synchronized through CodeFly when the other side can still reach the service.
+
 ### Remove A Host From The Mobile App
 
 In the mobile app, remove the paired host from the host list or host settings. This removes the mobile-side pairing record from the phone.
 
 [PLACEHOLDER: exact mobile UI path once finalized]
+
+### Binding And Relay Seat Rules
+
+CodeFly can bind multiple users and multiple mobile devices to the same host. Direct bindings are local to the host and phone.
+
+Relay subscriptions are counted per end user by bindable host seats. If multiple users bind the same host through Relay, they do not share one user's Relay entitlement. The same signed-in user can use their own devices to access the same bound host without consuming additional host seats.
 
 ### Full Local Reset
 

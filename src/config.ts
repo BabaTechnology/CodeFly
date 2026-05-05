@@ -46,6 +46,7 @@ export interface ClaudeAdapterConfig {
 
 export interface HostClientConfig {
   bindHost: string;
+  bindHosts: string[];
   port: number;
   managementPort: number;
   useTls: boolean;
@@ -73,7 +74,8 @@ export function loadHostClientConfig(): HostClientConfig {
   mkdirSync(dataDir, { recursive: true });
   const userHome = resolveUserHomePath(os.homedir());
 
-  const bindHost = process.env.HOST_CLIENT_BIND ?? "0.0.0.0";
+  const bindHosts = parseBindHosts(process.env.HOST_CLIENT_BIND ?? "0.0.0.0");
+  const bindHost = bindHosts.join(", ");
   const useTls = false;
   const port = Number(process.env.HOST_CLIENT_PORT ?? "7788");
   const managementPort = Number(process.env.HOST_CLIENT_MANAGEMENT_PORT ?? String(port + 1));
@@ -100,6 +102,7 @@ export function loadHostClientConfig(): HostClientConfig {
 
   const config: HostClientConfig = {
     bindHost,
+    bindHosts,
     port,
     managementPort,
     useTls,
@@ -166,6 +169,8 @@ function parseHostAdapterName(value: string | undefined): HostAdapterName {
 }
 
 export function normalizeHostClientConfig(config: HostClientConfig): void {
+  config.bindHosts = parseBindHosts(config.bindHosts.join(", "));
+  config.bindHost = config.bindHosts.join(", ");
   config.codex.homeDir = resolveUserHomePath(config.codex.homeDir);
   config.codex.configDir = resolveCodexConfigDir(config.codex.homeDir, config.codex.configDir);
   config.claude.homeDir = resolveUserHomePath(config.claude.homeDir);
@@ -173,6 +178,38 @@ export function normalizeHostClientConfig(config: HostClientConfig): void {
   config.claude.globalStatePath = resolveClaudeGlobalStatePath(config.claude.homeDir);
   config.workspaceDir = resolveProviderPath(config.workspaceDir, process.cwd());
   config.defaultWorkspaceDir = resolveProviderPath(config.defaultWorkspaceDir, process.cwd());
+}
+
+export function parseBindHosts(value: string): string[] {
+  const hosts = value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map(normalizeDirectPublicHost);
+  const uniqueHosts: string[] = [];
+  const seen = new Set<string>();
+  for (const host of hosts.length ? hosts : ["0.0.0.0"]) {
+    const key = host.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueHosts.push(host);
+    }
+  }
+  return collapseWildcardBindHosts(uniqueHosts);
+}
+
+function collapseWildcardBindHosts(hosts: string[]): string[] {
+  const hasIpv4Wildcard = hosts.includes("0.0.0.0");
+  const hasIpv6Wildcard = hosts.includes("::");
+  return hosts.filter((host) => {
+    if (hasIpv4Wildcard && isIP(host) === 4 && host !== "0.0.0.0") {
+      return false;
+    }
+    if (hasIpv6Wildcard && isIP(host) === 6 && host !== "::") {
+      return false;
+    }
+    return true;
+  });
 }
 
 function getPrimaryNetworkAddress(): string {

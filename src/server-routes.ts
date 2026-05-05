@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { mkdir, readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { buildDirectPublicUrl, normalizeDirectPublicHost } from "./config";
 import {
   getGitBranchListSnapshot,
   getGitCommitDetailSnapshot,
@@ -91,6 +92,7 @@ export function registerHostClientRoutes(context: Record<string, any>): void {
           providers: listProviderCapabilities(),
           defaultProvider: resolveDefaultProvider(),
           bindHost: config.bindHost,
+          bindHosts: config.bindHosts,
           port: config.port,
           transport: "tcp",
           directPublicUrl: config.directPublicUrl,
@@ -114,6 +116,7 @@ export function registerHostClientRoutes(context: Record<string, any>): void {
     providers: listProviderCapabilities(),
     defaultProvider: resolveDefaultProvider(),
     bindHost: config.bindHost,
+    bindHosts: config.bindHosts,
     port: config.port,
     transport: "tcp",
     directPublicUrl: config.directPublicUrl,
@@ -461,24 +464,38 @@ export function registerHostClientRoutes(context: Record<string, any>): void {
     }
   );
 
-  app.post<{ Body: { ttlSeconds?: number } }>("/api/direct/pairings/issue", async (request) => {
-    if (!isLoopbackRequest(request)) {
-      throw new Error("This endpoint is only available from localhost");
-    }
-    const ttlSeconds = Math.min(Math.max(request.body?.ttlSeconds ?? 300, 60), 1800);
-    const issued = hostStore.issuePairingCode(ttlSeconds, nowIso());
-    const bundle: PairingBundle = {
-      hostId: identity.hostId,
-      hostName: config.hostName,
-      directUrl: config.directPublicUrl,
-      hostPublicKey: identity.keyPair.publicKey,
-      hostPublicKeyFingerprint: publicKeyFingerprint(identity.keyPair.publicKey),
-      pairingCode: issued.code,
-      expiresAt: issued.expiresAt
-    };
+  app.post<{ Body: { ttlSeconds?: number; publicHost?: string } }>(
+    "/api/direct/pairings/issue",
+    async (request, reply) => {
+      if (!isLoopbackRequest(request)) {
+        throw new Error("This endpoint is only available from localhost");
+      }
+      const ttlSeconds = Math.min(Math.max(request.body?.ttlSeconds ?? 300, 60), 1800);
+      let publicHost = config.directPublicHost;
+      if (request.body?.publicHost) {
+        try {
+          publicHost = normalizeDirectPublicHost(request.body.publicHost);
+        } catch (error) {
+          return reply.code(400).send({
+            error: error instanceof Error ? error.message : "Invalid public host"
+          });
+        }
+      }
+      const directUrl = buildDirectPublicUrl(publicHost, config.port);
+      const issued = hostStore.issuePairingCode(ttlSeconds, nowIso(), directUrl);
+      const bundle: PairingBundle = {
+        hostId: identity.hostId,
+        hostName: config.hostName,
+        directUrl,
+        hostPublicKey: identity.keyPair.publicKey,
+        hostPublicKeyFingerprint: publicKeyFingerprint(identity.keyPair.publicKey),
+        pairingCode: issued.code,
+        expiresAt: issued.expiresAt
+      };
 
-    return bundle;
-  });
+      return bundle;
+    }
+  );
 
   app.get<{ Params: { provider: string } }>(
     "/api/runtime/providers/:provider",

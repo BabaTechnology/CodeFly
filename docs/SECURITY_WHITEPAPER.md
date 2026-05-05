@@ -60,7 +60,6 @@ Direct Mode properties:
 
 - OAuth sign-in is not required.
 - No Relay server is used for session traffic.
-- The same secure host communication model is used as CodeFly Relay.
 - The host listens on the configured Direct port, default `7788`.
 
 Direct Mode works when the phone can reach the computer on the network, such as local Wi-Fi, VPN, private network overlay, or a user-managed TCP tunnel.
@@ -77,7 +76,7 @@ CodeFly Relay properties:
 
 - The phone and host both make outbound connections.
 - No port forwarding is required.
-- Relay access is tied to OAuth sign-in and subscribed host seats.
+- Relay access is tied to a Relay entitlement and subscribed host seats. OAuth sign-in lets the entitlement be shared across the user's own devices.
 - The Relay routes encrypted frames by host seat and device identity.
 - The Relay forwards encrypted traffic and cannot access transmitted content.
 
@@ -93,7 +92,7 @@ The secure connection between the mobile app and CodeFly Host uses a host-side c
 
 The host certificate is independent from CodeFly Relay. When CodeFly Relay is used, the Relay forwards traffic between endpoints, but it does not receive the host certificate private key and cannot use it to decrypt host-phone communication.
 
-The CLI can show the certificate path, key path, certificate fingerprint, and host public key fingerprint under `Manage security certificate`.
+The CLI can show and manage the certificate path, key path, certificate fingerprint, and host public key fingerprint under `Manage security certificate`.
 
 ### Application Frames
 
@@ -125,7 +124,23 @@ Each encrypted frame contains routing metadata and ciphertext:
 
 The Relay needs routing metadata to deliver frames. The Relay does not have the host certificate private key or endpoint secret keys required to decrypt transmitted content.
 
-[PLACEHOLDER: frame anatomy diagram showing visible routing metadata vs encrypted payload]
+```mermaid
+flowchart LR
+  Phone["Mobile App"] --> Frame["Encrypted transport frame"]
+  Frame --> Relay["CodeFly Relay"]
+  Relay --> Host["CodeFly Host"]
+
+  subgraph Visible["Visible routing metadata"]
+    Route["routeMode, seatId, senderId, recipientId, senderPublicKey, timestamp, message size"]
+  end
+
+  subgraph Ciphertext["Encrypted payload"]
+    Payload["prompts, responses, command output, file data, diffs, approvals, provider messages"]
+  end
+
+  Route -. "used for forwarding" .- Frame
+  Payload -. "ciphertext only" .- Frame
+```
 
 ## Pairing Model
 
@@ -153,7 +168,7 @@ Relay pairing flow:
 1. The user runs `codefly` on the host computer.
 2. The host asks CodeFly Relay for a short-lived Relay pairing token.
 3. The host displays a QR code containing the Relay node and pairing token.
-4. The mobile app scans the QR code and claims the pairing under the signed-in OAuth-linked user profile.
+4. The mobile app scans the QR code and claims the pairing under an available Relay entitlement. OAuth sign-in associates that entitlement with the user's own devices.
 5. The Relay creates or updates a host binding for the subscribed host seat.
 6. The host receives a Relay credential through the pairing status channel.
 7. The host opens a long-lived outbound Relay connection.
@@ -286,7 +301,7 @@ CodeFly's end-to-end encryption protects application payloads between phone and 
 - provider tools cannot read their own sessions
 - metadata is invisible to the Relay
 - push notifications contain no metadata
-- CodeFly Relay works without OAuth sign-in or a subscribed host seat
+- CodeFly Relay works without a Relay entitlement or subscribed host seat
 
 The strongest security boundary is between encrypted session content and the Relay service.
 
@@ -299,13 +314,3 @@ CodeFly's pricing model follows the architecture:
 - Relay plans are based on subscribed host seats.
 
 Users who can connect directly do not need to pay. Users who need reliable remote routing pay only for the hosts they connect through the Relay.
-
-## Future Hardening
-
-Planned or recommended hardening areas:
-
-- Independent security review of the pairing and Relay protocol.
-- Public protocol diagrams and test vectors.
-- Clearer device removal and lost-device recovery documentation.
-- Optional enterprise controls for Relay host governance.
-- More visible in-app warnings for trust changes such as host key rotation.

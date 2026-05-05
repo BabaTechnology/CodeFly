@@ -7,6 +7,7 @@ interface PairingCodeRecord {
   code: string;
   expiresAt: string;
   createdAt: string;
+  directUrl?: string | null;
   claimedAt?: string | null;
 }
 
@@ -16,6 +17,7 @@ interface PersistedPairedDevice extends PairedDevice {
 
 export interface DirectServiceConfig {
   publicHost: string;
+  bindHosts: string[];
   port: number;
   certificatePath?: string | null;
 }
@@ -100,6 +102,7 @@ export class HostStore {
     const current = this.state.directServiceConfig;
     const next: DirectServiceConfig = {
       publicHost: current?.publicHost?.trim() || defaults.publicHost,
+      bindHosts: sanitizeBindHosts(current?.bindHosts, defaults.bindHosts),
       port: Number.isFinite(current?.port) && current!.port > 0 ? current!.port : defaults.port,
       certificatePath: current?.certificatePath?.trim() || defaults.certificatePath || null
     };
@@ -111,6 +114,7 @@ export class HostStore {
   public setDirectServiceConfig(next: DirectServiceConfig): DirectServiceConfig {
     this.state.directServiceConfig = {
       publicHost: next.publicHost.trim(),
+      bindHosts: sanitizeBindHosts(next.bindHosts, ["0.0.0.0"]),
       port: next.port,
       certificatePath: next.certificatePath?.trim() || null
     };
@@ -233,7 +237,11 @@ export class HostStore {
     return { ...binding };
   }
 
-  public issuePairingCode(ttlSeconds: number, createdAt: string): { code: string; expiresAt: string } {
+  public issuePairingCode(
+    ttlSeconds: number,
+    createdAt: string,
+    directUrl?: string | null
+  ): { code: string; expiresAt: string } {
     this.prunePairingCodes();
     const code = generateBindingCode();
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000).toISOString();
@@ -241,24 +249,27 @@ export class HostStore {
       code,
       createdAt,
       expiresAt,
+      directUrl: directUrl?.trim() || null,
       claimedAt: null
     });
     this.save();
     return { code, expiresAt };
   }
 
-  public claimPairingCode(code: string): boolean {
+  public claimPairingCode(code: string): { directUrl?: string | null } | null {
     this.prunePairingCodes();
     const pairing = this.state.pairingCodes.find(
       (entry) => entry.code.toLowerCase() === code.toLowerCase()
     );
     if (!pairing || pairing.claimedAt) {
-      return false;
+      return null;
     }
 
     pairing.claimedAt = new Date().toISOString();
     this.save();
-    return true;
+    return {
+      directUrl: pairing.directUrl ?? null
+    };
   }
 
   public pairDevice(
@@ -416,7 +427,20 @@ function isDirectServiceConfig(value: unknown): value is DirectServiceConfig {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return typeof record.publicHost === "string" && typeof record.port === "number";
+  return (
+    typeof record.publicHost === "string" &&
+    typeof record.port === "number" &&
+    (record.bindHosts === undefined ||
+      (Array.isArray(record.bindHosts) && record.bindHosts.every((entry) => typeof entry === "string")))
+  );
+}
+
+function sanitizeBindHosts(value: unknown, fallback: string[]): string[] {
+  const input = Array.isArray(value) ? value : [];
+  const hosts = input
+    .map((entry) => (typeof entry === "string" ? entry.trim() : ""))
+    .filter(Boolean);
+  return hosts.length ? hosts : fallback;
 }
 
 function isRelayBindingRecord(value: unknown): value is RelayBindingRecord {

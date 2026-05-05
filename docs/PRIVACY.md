@@ -10,7 +10,7 @@ This document explains how CodeFly Host, CodeFly mobile apps, and CodeFly Relay 
 
 - Direct Mode does not require OAuth sign-in.
 - Direct Mode does not route session traffic through CodeFly Relay.
-- CodeFly Relay requires OAuth sign-in because Relay access is tied to subscribed host seats.
+- CodeFly Relay uses Relay entitlements and subscribed host seats. OAuth sign-in lets a user's entitlement work across their own devices; without OAuth sign-in, a purchase may be limited to the device that made the purchase.
 - CodeFly cannot access data transmitted between the phone and host, and does not record transmitted content.
 - Provider sessions remain on the user's host computer.
 - Users should be able to delete OAuth-linked profile, Relay, and device data through documented flows.

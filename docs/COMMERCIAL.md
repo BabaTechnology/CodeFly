@@ -17,6 +17,8 @@ CodeFly currently defines four Relay subscription tiers:
 
 A Relay host seat represents one computer that can stay reachable through CodeFly Relay. Direct access does not require a Relay subscription.
 
+Without OAuth sign-in, a Relay purchase is available only on the device that made the purchase. After signing in with a supported OAuth provider, the same user's Relay entitlement can be used across their own devices.
+
 ## Trial
 
 CodeFly is intended to provide a 7-day free Pro trial by default. Exact trial availability, eligibility, renewal behavior, cancellation behavior, and billing terms are determined by the payment platform shown in the mobile app.
@@ -31,4 +33,4 @@ Students, educators, and project contributors may contact us for free Relay acce
 
 ## Availability
 
-We will do our best to keep CodeFly Relay reliable and available. Direct access remains the fallback path when the phone can reach the host through local networking, a VPN, a tunnel, or another user-managed network path.
+We will do our best to keep CodeFly Relay reliable and available. We will adjust Relay server locations and capacity based on real usage so users can get low-latency, smooth remote access where it is needed. Direct access remains the fallback path when the phone can reach the host through local networking, a VPN, a tunnel, or another user-managed network path.

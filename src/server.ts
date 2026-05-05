@@ -24,7 +24,12 @@ import path from "node:path";
 import { TextDecoder } from "node:util";
 import { createAdapters } from "./adapters";
 import type { AgentAdapter } from "./adapters/base";
-import { buildDirectPublicUrl, loadHostClientConfig, normalizeDirectPublicHost } from "./config";
+import {
+  buildDirectPublicUrl,
+  loadHostClientConfig,
+  normalizeDirectPublicHost,
+  parseBindHosts
+} from "./config";
 import { collectHostHardwareSnapshot } from "./hardware-status";
 import { HostStore } from "./host-store";
 import { ensureHostIdentity } from "./identity";
@@ -140,6 +145,10 @@ function deriveTlsKeyPath(certificatePath: string): string {
   return path.join(parsed.dir, `${parsed.name}.key`);
 }
 
+function sameStringArray(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
 export async function startHostClient(): Promise<void> {
   const config = loadHostClientConfig();
   const runtimeConfigStore = new RuntimeConfigStore(config.runtimeConfigPath);
@@ -147,10 +156,13 @@ export async function startHostClient(): Promise<void> {
   const hostStore = new HostStore(config.hostStatePath);
   const directServiceConfig = hostStore.ensureDirectServiceConfig({
     publicHost: config.directPublicHost,
+    bindHosts: config.bindHosts,
     port: config.port,
     certificatePath: config.directCertificatePath
   });
   config.port = directServiceConfig.port;
+  config.bindHosts = directServiceConfig.bindHosts;
+  config.bindHost = config.bindHosts.join(", ");
   config.directPublicHost = directServiceConfig.publicHost;
   config.directCertificatePath = directServiceConfig.certificatePath ?? config.directCertificatePath;
   config.directKeyPath =
@@ -1248,7 +1260,8 @@ export async function startHostClient(): Promise<void> {
         const payload = (message.payload as Record<string, unknown> | undefined) ?? {};
         const code = String(payload.code ?? "").trim().toUpperCase();
         const deviceLabel = String(payload.deviceLabel ?? source.label ?? source.deviceId).trim();
-        if (!code || !hostStore.claimPairingCode(code)) {
+        const pairing = code ? hostStore.claimPairingCode(code) : null;
+        if (!pairing) {
           throw new Error("Invalid or expired pairing code");
         }
         const { authToken } = hostStore.pairDevice(
@@ -1266,7 +1279,7 @@ export async function startHostClient(): Promise<void> {
             deviceId: source.deviceId,
             authToken,
             hostName: config.hostName,
-            directUrl: config.directPublicUrl,
+            directUrl: pairing.directUrl || config.directPublicUrl,
             serviceBaseUrl: hostStore.getServiceBaseUrl() ?? config.serviceBaseUrl ?? null,
             hostPublicKey: identity.keyPair.publicKey,
             hostPublicKeyFingerprint: identity.publicKeyFingerprint
@@ -1818,13 +1831,15 @@ export async function startHostClient(): Promise<void> {
     }
     return {
       publicHost: config.directPublicHost,
+      bindHost: config.bindHost,
+      bindHosts: config.bindHosts,
       port: config.port,
       directPublicUrl: config.directPublicUrl,
       restartRequired: false
     };
   });
 
-  app.put<{ Body: { publicHost?: string; port?: number } }>(
+  app.put<{ Body: { publicHost?: string; bindHosts?: string[] | string; port?: number } }>(
     "/api/host/direct-service-config",
     async (request, reply) => {
       if (!requireLoopbackRequest(request, reply)) {
@@ -1842,22 +1857,39 @@ export async function startHostClient(): Promise<void> {
       if (!publicHost || !Number.isFinite(port) || port <= 0 || port > 65535) {
         return reply.code(400).send({ error: "publicHost and port are required" });
       }
+      let bindHosts: string[];
+      try {
+        const rawBindHosts = Array.isArray(request.body?.bindHosts)
+          ? request.body.bindHosts.join(",")
+          : String(request.body?.bindHosts ?? config.bindHosts.join(","));
+        bindHosts = parseBindHosts(rawBindHosts);
+      } catch (error) {
+        return reply.code(400).send({
+          error: error instanceof Error ? error.message : "Invalid bind hosts"
+        });
+      }
 
       const previousPort = config.port;
+      const previousBindHosts = [...config.bindHosts];
       const next = hostStore.setDirectServiceConfig({
         publicHost,
+        bindHosts,
         port,
         certificatePath: config.directCertificatePath
       });
       config.directPublicHost = next.publicHost;
+      config.bindHosts = next.bindHosts;
+      config.bindHost = config.bindHosts.join(", ");
       config.port = next.port;
       config.directPublicUrl = buildDirectPublicUrl(config.directPublicHost, config.port);
 
       return {
         publicHost: config.directPublicHost,
+        bindHost: config.bindHost,
+        bindHosts: config.bindHosts,
         port: config.port,
         directPublicUrl: config.directPublicUrl,
-        restartRequired: previousPort !== config.port
+        restartRequired: previousPort !== config.port || !sameStringArray(previousBindHosts, config.bindHosts)
       };
     }
   );
@@ -1888,6 +1920,7 @@ export async function startHostClient(): Promise<void> {
     const previousCertificatePath = config.directCertificatePath;
     const next = hostStore.setDirectServiceConfig({
       publicHost: config.directPublicHost,
+      bindHosts: config.bindHosts,
       port: config.port,
       certificatePath
     });
@@ -1929,16 +1962,32 @@ export async function startHostClient(): Promise<void> {
 
   relayUpstreams.startAllRelayUpstreams();
 
-  const directRawServer = net.createServer((socket) => registerDirectRawSocket(socket));
-  await new Promise<void>((resolve, reject) => {
-    directRawServer.once("error", reject);
-    directRawServer.listen(config.port, config.bindHost, () => {
-      directRawServer.off("error", reject);
-      resolve();
+  const directRawServers: net.Server[] = [];
+  for (const bindHost of config.bindHosts) {
+    const directRawServer = net.createServer((socket) => registerDirectRawSocket(socket));
+    await new Promise<void>((resolve, reject) => {
+      directRawServer.once("error", reject);
+      directRawServer.listen(
+        {
+          port: config.port,
+          host: bindHost,
+          ipv6Only: bindHost === "::"
+        },
+        () => {
+          directRawServer.off("error", reject);
+          app.log.info({ bindHost, port: config.port }, "Direct raw TCP listener started");
+          resolve();
+        }
+      );
     });
-  });
+    directRawServers.push(directRawServer);
+  }
   app.addHook("onClose", async () => {
-    await new Promise<void>((resolve) => directRawServer.close(() => resolve()));
+    await Promise.all(
+      directRawServers.map(
+        (directRawServer) => new Promise<void>((resolve) => directRawServer.close(() => resolve()))
+      )
+    );
   });
 
   await app.listen({
