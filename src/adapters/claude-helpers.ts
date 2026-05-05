@@ -798,10 +798,35 @@ export function buildClaudeMessageSummary(message: Record<string, unknown>): str
       ? "Claude produced an error result."
       : "Claude produced a result.";
   }
+  if (type === "system" && subtype === "api_retry") {
+    return buildClaudeApiRetrySummary(message);
+  }
   if (subtype) {
     return `Claude emitted ${type}/${subtype}.`;
   }
   return `Claude emitted ${type}.`;
+}
+
+function buildClaudeApiRetrySummary(message: Record<string, unknown>): string {
+  const attempt = asNumber(message.attempt);
+  const maxRetries = asNumber(message.max_retries);
+  const retryDelayMs = asNumber(message.retry_delay_ms);
+  const delaySeconds =
+    retryDelayMs != null && retryDelayMs > 0 ? Math.max(1, Math.round(retryDelayMs / 1000)) : null;
+  const attemptLabel =
+    attempt != null && maxRetries != null ? `${attempt}/${maxRetries}` : attempt != null ? `${attempt}` : "";
+  const delayLabel = delaySeconds != null ? ` in ${delaySeconds}s` : "";
+  const errorStatus = asNumber(message.error_status);
+  const error = extractString(message.error);
+  const reason =
+    errorStatus != null
+      ? ` after HTTP ${errorStatus}`
+      : error && error !== "unknown"
+        ? ` after ${error}`
+        : "";
+  return attemptLabel
+    ? `API retry ${attemptLabel}${delayLabel}${reason}.`
+    : `API retry${delayLabel}${reason}.`;
 }
 
 export function buildClaudePlanUpdate(message: Record<string, unknown>) {

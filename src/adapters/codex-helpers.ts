@@ -1059,6 +1059,7 @@ export function mapCodexThreadStatus(status: unknown): AgentSession["state"] {
   const activeFlags = Array.isArray((status as { activeFlags?: unknown[] } | undefined)?.activeFlags)
     ? ((status as { activeFlags?: unknown[] }).activeFlags ?? []).map(String)
     : [];
+  const connectionLifecycleText = [type, ...activeFlags].join(" ");
 
   if (type === "active") {
     if (activeFlags.includes("waitingOnApproval")) {
@@ -1067,6 +1068,9 @@ export function mapCodexThreadStatus(status: unknown): AgentSession["state"] {
     if (activeFlags.includes("waitingOnInput") || activeFlags.includes("waitingOnChoice")) {
       return "awaiting_choice";
     }
+    return "running";
+  }
+  if (isCodexConnectionLifecycleText(connectionLifecycleText)) {
     return "running";
   }
   if (type === "systemError") {
@@ -1118,6 +1122,13 @@ export function shouldEmitCodexProviderEvent(method: string): boolean {
   return true;
 }
 
+export function summarizeCodexProviderEvent(
+  method: string,
+  params: Record<string, unknown>
+): string {
+  return extractCodexConnectionLifecycleSummary(params) ?? `Codex emitted ${method}.`;
+}
+
 export function sanitizeCodexProviderEventParams(
   method: string,
   params: Record<string, unknown>
@@ -1147,6 +1158,85 @@ export function sanitizeCodexProviderEventParams(
     sessionId: params.sessionId,
     status: params.status
   };
+}
+
+function extractCodexConnectionLifecycleSummary(value: unknown, depth = 0): string | undefined {
+  if (depth > 4 || value == null) {
+    return undefined;
+  }
+  if (typeof value === "string") {
+    const normalized = normalizeProviderText(value);
+    return isCodexConnectionLifecycleText(normalized) ? normalized : undefined;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const summary = extractCodexConnectionLifecycleSummary(item, depth + 1);
+      if (summary) {
+        return summary;
+      }
+    }
+    return undefined;
+  }
+  if (typeof value !== "object") {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  for (const key of [
+    "message",
+    "summary",
+    "text",
+    "description",
+    "detail",
+    "reason",
+    "statusText"
+  ]) {
+    const summary = extractCodexConnectionLifecycleSummary(record[key], depth + 1);
+    if (summary) {
+      return summary;
+    }
+  }
+
+  const type = typeof record.type === "string" ? record.type : "";
+  const status = typeof record.status === "string" ? record.status : "";
+  const activeFlags = Array.isArray(record.activeFlags) ? record.activeFlags.map(String) : [];
+  const lifecycleText = normalizeProviderText([type, status, ...activeFlags].filter(Boolean).join(" "));
+  if (isCodexConnectionLifecycleText(lifecycleText)) {
+    return humanizeCodexLifecycleText(lifecycleText);
+  }
+
+  for (const item of Object.values(record)) {
+    const summary = extractCodexConnectionLifecycleSummary(item, depth + 1);
+    if (summary) {
+      return summary;
+    }
+  }
+  return undefined;
+}
+
+function normalizeProviderText(value: string): string {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function isCodexConnectionLifecycleText(value: string): boolean {
+  const normalized = value.toLowerCase();
+  return (
+    normalized.includes("reconnect") ||
+    normalized.includes("reconnecting") ||
+    normalized.includes("retry") ||
+    normalized.includes("retrying") ||
+    normalized.includes("connection lost") ||
+    normalized.includes("connection interrupted") ||
+    normalized.includes("temporarily unavailable")
+  );
+}
+
+function humanizeCodexLifecycleText(value: string): string {
+  const normalized = value.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return "Reconnecting";
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function sanitizeCodexTurn(value: unknown): Record<string, unknown> | undefined {

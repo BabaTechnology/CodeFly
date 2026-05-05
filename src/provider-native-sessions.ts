@@ -604,6 +604,23 @@ function parseCodexHistoryFile(filePath: string, sessionId: string): SessionHist
             text: summary
           });
         }
+      } else {
+        const connectionSummary =
+          extractProviderConnectionHistorySummary(payload) ??
+          extractProviderConnectionHistorySummary(entry);
+        if (connectionSummary) {
+          entries.push({
+            id: `meta:provider_connection:${buildHistoryEntryId(sessionId, filePath, sequence++)}`,
+            sessionId,
+            adapter: "codex",
+            timestamp,
+            role: "meta",
+            kind: "meta",
+            phase: "completed",
+            summary: connectionSummary,
+            text: connectionSummary
+          });
+        }
       }
       continue;
     }
@@ -731,6 +748,68 @@ function summarizeApplyPatchTrace(rawOutput: string | undefined, fallback: strin
   }
 
   return parts.length > 0 ? parts.join(" | ") : fallback;
+}
+
+function extractProviderConnectionHistorySummary(value: unknown, depth = 0): string | undefined {
+  if (depth > 4 || value == null) {
+    return undefined;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().replace(/\s+/g, " ");
+    return isProviderConnectionHistoryText(normalized) ? normalized : undefined;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const summary = extractProviderConnectionHistorySummary(item, depth + 1);
+      if (summary) {
+        return summary;
+      }
+    }
+    return undefined;
+  }
+  if (typeof value !== "object") {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  for (const key of ["message", "summary", "text", "description", "detail", "reason", "statusText"]) {
+    const summary = extractProviderConnectionHistorySummary(record[key], depth + 1);
+    if (summary) {
+      return summary;
+    }
+  }
+  const lifecycleText = [
+    extractString(record.type),
+    extractString(record.status),
+    ...(Array.isArray(record.activeFlags) ? record.activeFlags.map(String) : [])
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (isProviderConnectionHistoryText(lifecycleText)) {
+    return lifecycleText.charAt(0).toUpperCase() + lifecycleText.slice(1);
+  }
+  for (const item of Object.values(record)) {
+    const summary = extractProviderConnectionHistorySummary(item, depth + 1);
+    if (summary) {
+      return summary;
+    }
+  }
+  return undefined;
+}
+
+function isProviderConnectionHistoryText(value: string): boolean {
+  const normalized = value.toLowerCase();
+  return (
+    normalized.includes("reconnect") ||
+    normalized.includes("reconnecting") ||
+    normalized.includes("retry") ||
+    normalized.includes("retrying") ||
+    normalized.includes("connection lost") ||
+    normalized.includes("connection interrupted") ||
+    normalized.includes("temporarily unavailable")
+  );
 }
 
 function extractToolOutputBody(rawOutput: string | undefined): string | undefined {

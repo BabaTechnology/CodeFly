@@ -11,7 +11,12 @@ import {
   getGitSummarySnapshot,
   GitWorkspaceError
 } from "./git";
-import type { GlobalConfigPatchInput, SessionConfigPatchInput } from "./provider-config";
+import type {
+  GlobalConfigPatchInput,
+  ProviderConfigManager,
+  ProviderName,
+  SessionConfigPatchInput
+} from "./provider-config";
 
 export function registerHostClientRoutes(context: Record<string, any>): void {
   const app = context.app as FastifyInstance;
@@ -545,12 +550,19 @@ export function registerHostClientRoutes(context: Record<string, any>): void {
     if (!provider) {
       return reply;
     }
-    runtimeConfigStore.patchProvider(provider, request.body?.values ?? {}, config);
-    return runtimeConfigStore.getProviderSnapshot(
+    const values = request.body?.values ?? {};
+    const previousCodexProviderName = config.codex.providerName;
+    runtimeConfigStore.patchProvider(provider, values, config);
+    syncRuntimeValuesToProviderConfig(provider, values, providerConfigs, config, previousCodexProviderName);
+    const reloaded = await maybeReloadRuntime(provider, true);
+    return {
+      ...runtimeConfigStore.getProviderSnapshot(
       provider,
       config,
       detectProviderAuthMode(provider)
-    );
+      ),
+      reloaded
+    };
   });
 
   app.get<{ Params: { provider: string } }>(
@@ -945,4 +957,107 @@ export function registerHostClientRoutes(context: Record<string, any>): void {
       };
     }
   );
+}
+
+function syncRuntimeValuesToProviderConfig(
+  provider: ProviderName,
+  values: Record<string, unknown>,
+  providerConfigs: ProviderConfigManager,
+  config: Record<string, any>,
+  previousCodexProviderName: string
+): void {
+  if (provider === "codex") {
+    const set: Record<string, unknown> = {};
+    const unset: string[] = [];
+    const codex = config.codex as Record<string, any>;
+    const providerName = String(codex.providerName ?? "openai");
+
+    if (
+      hasOwn(values, "providerName") ||
+      hasOwn(values, "baseUrl") ||
+      providerName !== previousCodexProviderName
+    ) {
+      set.model_provider = providerName;
+      set.model_providers = {
+        [providerName]: {
+          name: providerName,
+          base_url: String(codex.baseUrl ?? ""),
+          wire_api: "responses",
+          requires_openai_auth: true,
+          env_key: "OPENAI_API_KEY"
+        }
+      };
+      if (previousCodexProviderName && previousCodexProviderName !== providerName) {
+        unset.push(`model_providers.${previousCodexProviderName}`);
+      }
+    }
+
+    if (hasOwn(values, "model")) {
+      set.model = codex.model;
+    }
+    if (hasOwn(values, "reasoningEffort")) {
+      if (codex.reasoningEffort) {
+        set.model_reasoning_effort = codex.reasoningEffort;
+      } else {
+        unset.push("model_reasoning_effort", "reasoning_effort");
+      }
+    }
+    if (hasOwn(values, "approvalPolicy")) {
+      set.approval_policy = codex.approvalPolicy;
+    }
+    if (hasOwn(values, "approvalsReviewer")) {
+      set.approvals_reviewer = codex.approvalsReviewer;
+    }
+    if (hasOwn(values, "sandbox")) {
+      set.sandbox_mode = codex.sandbox;
+    }
+
+    if (Object.keys(set).length > 0 || unset.length > 0) {
+      providerConfigs.patchGlobal("codex", {
+        documents: {
+          config: {
+            set,
+            unset
+          }
+        }
+      });
+    }
+    return;
+  }
+
+  const claude = config.claude as Record<string, any>;
+  const settingsSet: Record<string, unknown> = {};
+  const settingsUnset: string[] = [];
+
+  if (hasOwn(values, "model")) {
+    settingsSet.model = claude.model;
+  }
+  if (hasOwn(values, "permissionMode")) {
+    settingsSet.defaultMode = claude.permissionMode;
+    settingsSet.permissionMode = claude.permissionMode;
+  }
+  if (hasOwn(values, "reasoningEffort")) {
+    if (claude.reasoningEffort) {
+      settingsSet.env = {
+        CLAUDE_CODE_EFFORT_LEVEL: claude.reasoningEffort
+      };
+    } else {
+      settingsUnset.push("env.CLAUDE_CODE_EFFORT_LEVEL");
+    }
+  }
+
+  if (Object.keys(settingsSet).length > 0 || settingsUnset.length > 0) {
+    providerConfigs.patchGlobal("claude", {
+      documents: {
+        settings: {
+          set: settingsSet,
+          unset: settingsUnset
+        }
+      }
+    });
+  }
+}
+
+function hasOwn(value: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(value, key);
 }

@@ -60,7 +60,8 @@ import {
   resolveCodexBinary,
   sanitizeCodexItemForToolEvent,
   sanitizeCodexProviderEventParams,
-  shouldEmitCodexProviderEvent
+  shouldEmitCodexProviderEvent,
+  summarizeCodexProviderEvent
 } from "./codex-helpers";
 import { mergeDiscoveredSession } from "./discovered-session";
 
@@ -830,7 +831,7 @@ export class CodexAdapter implements AgentAdapter {
 	          sessionId,
 	          "notification",
 	          message.method,
-	          `Codex emitted ${message.method}.`,
+	          summarizeCodexProviderEvent(message.method, params),
 	          sanitizeCodexProviderEventParams(message.method, params)
 	        );
 	      }
@@ -911,12 +912,16 @@ export class CodexAdapter implements AgentAdapter {
         if (!runtime) {
           return;
         }
+        const statusSummary = summarizeCodexProviderEvent(message.method, params);
         runtime.session.state = mapCodexThreadStatus(params.status);
         runtime.session.updatedAt = nowIso();
         this.upsertSession(runtime.session);
         await this.emitSessionState(sessionId, runtime.session.state, {
           reason: "thread_status_changed",
-          summary: `Codex thread status changed to ${runtime.session.state}.`,
+          summary:
+            statusSummary === `Codex emitted ${message.method}.`
+              ? `Codex thread status changed to ${runtime.session.state}.`
+              : statusSummary,
           waitingFor:
             runtime.session.state === "awaiting_approval"
               ? "approval"
