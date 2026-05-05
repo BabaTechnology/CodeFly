@@ -1,12 +1,8 @@
 <p align="center">
-  <img src="docs/assets/codefly-app-icon.png" alt="CodeFly" width="96" height="96" />
+  <img src="docs/assets/codefly-github-header.png" alt="CodeFly" />
 </p>
 
-<h1 align="center">CodeFly 🚀</h1>
-
-<p align="center">
-  <strong>Seamless mobile client for Codex and Claude Code workflows.</strong>
-</p>
+<h2 align="center">Seamless mobile client for Codex and Claude Code workflows.</h2>
 
 <p align="center">
   <a href="https://codefly.run">🌐 Website</a> ·
@@ -62,7 +58,7 @@ CodeFly requires Node.js 20.19 or newer. Continue with the [Quickstart](docs/QUI
 
 | Mode | Best for | Sign-in | Cost |
 | --- | --- | --- | --- |
-| [Direct](docs/QUICKSTART.md#direct-mode) | Local Wi-Fi, VPNs, private overlays, reachable hostnames, or public addresses | Not required | Free forever |
+| [Direct](docs/QUICKSTART.md#direct-mode) | Local Wi-Fi or a directly reachable public address | Not required | Free forever |
 | [Self-Hosted Relay](docs/SELF_HOSTED_RELAY.md) | Your own TCP proxy, tunnel, VPN, or network path | Not required | Free forever |
 | [CodeFly Relay](docs/QUICKSTART.md#codefly-relay) | NAT, changing IP addresses, restrictive networks, travel, no port forwarding | OAuth sign-in recommended for multi-device use | Subscription by host seat |
 
@@ -76,7 +72,7 @@ CodeFly cannot access any data transmitted between the host and phone, and does 
 - Resume existing host sessions that are already available on the computer.
 - Use a complete mobile vibe coding workflow: prompts, approvals, files, diffs, status, and interruptions.
 - Choose Direct, self-hosted reachability, or CodeFly Relay based on your network.
-- Configure Direct with IPv4, IPv6, or DNS host addresses, plus one or more local listener addresses.
+- Configure Direct with a reachable host address, plus one or more local listener addresses.
 - Keep provider tools, accounts, configuration, workspaces, and session history on your own machine.
 
 ## 🧩 Product Model
@@ -116,7 +112,7 @@ flowchart LR
   Relay["CodeFly Relay<br/>managed reachability"]
   UserNetwork["Self-hosted path<br/>VPN / tunnel / proxy"]
 
-  Phone -->|"Direct<br/>local Wi-Fi, VPN, public IP, DNS"| Host
+  Phone -->|"Direct<br/>local Wi-Fi or public address"| Host
   Phone -->|"Self-hosted reachability"| UserNetwork --> Host
   Phone -->|"CodeFly Relay"| Relay --> Host
   Host --> Providers
