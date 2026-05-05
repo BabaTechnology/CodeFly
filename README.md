@@ -1,12 +1,20 @@
 # CodeFly Host
 
-Control Codex and Claude Code from your phone.
+Seamlessly continue your Codex and Claude Code workflow on your phone.
 
-CodeFly Host is the small daemon that runs on your computer next to your existing AI coding tools. Pair it with the CodeFly mobile app, scan one QR code, and you can watch progress, send follow-up instructions, approve actions, inspect files, and check Git changes from iOS or Android.
+[Website](#placeholder-website-url) · [Quickstart](docs/QUICKSTART.md) · [Security](docs/SECURITY_WHITEPAPER.md) · [Commercial](docs/COMMERCIAL.md) · [Privacy](docs/PRIVACY.md) · [Support](#placeholder-support-url)
 
-[PLACEHOLDER: product screenshot showing the mobile app connected to a running host]
+CodeFly Host is the small daemon that runs on your computer next to your existing AI coding tools. Pair it with the CodeFly mobile app for a smooth, near-native mobile experience: create tasks, start sessions, steer complete vibe coding workflows, approve actions, inspect changed files, check Git diffs, and continue long-running work from iOS or Android.
+
+CodeFly supports Direct Mode, self-hosted reachability through your own network path, and CodeFly Relay for managed remote access.
+
+[PLACEHOLDER: hero screenshot showing the mobile app controlling a running Codex or Claude Code session]
 
 ## Install
+
+Download the CodeFly mobile app:
+
+[App Store](#placeholder-app-store-url) · [Google Play](#placeholder-google-play-url)
 
 Install the host package on the computer where Codex or Claude Code is already installed and signed in.
 
@@ -22,92 +30,55 @@ codefly
 
 CodeFly Host requires Node.js 20.19 or newer.
 
-## Quick Start
+Continue with the [Quickstart](docs/QUICKSTART.md) to connect your phone using Direct Mode or CodeFly Relay.
 
-1. Install the CodeFly mobile app for iOS or Android.
-2. Run `codefly` on your computer.
-3. Choose direct pairing for a local/free connection, or relay pairing for remote access.
-4. Scan the QR code from the mobile app.
-5. Open a workspace, choose Codex or Claude Code, and start controlling the session from your phone.
+## Connection Modes
 
-Direct pairing does not require a CodeFly account. Relay pairing requires an account because relay access is tied to a host subscription.
+| Mode | Best for | Sign-in | Cost |
+| --- | --- | --- | --- |
+| [Direct](docs/QUICKSTART.md#direct-mode) | Local Wi-Fi, private networks, VPNs, or any reachable host address | Not required | Free forever |
+| [Self-Hosted Relay](docs/SELF_HOSTED_RELAY.md) | Your own TCP proxy, tunnel, VPN, or private overlay | Not required | Free forever |
+| [CodeFly Relay](docs/QUICKSTART.md#codefly-relay) | NAT, changing IP addresses, restrictive networks, travel, no port forwarding | OAuth sign-in required | Subscription by host seat |
 
-## Links
+We want CodeFly to be usable by everyone who needs mobile access, so Direct Mode is not intentionally limited just because it is free. CodeFly Relay provides convenient, maintenance-free, high-availability remote reachability while keeping the same end-to-end encrypted security model as Direct Mode.
 
-- iOS app: [PLACEHOLDER: App Store URL]
-- Android app: [PLACEHOLDER: Google Play URL]
-- Website: [PLACEHOLDER: https://codefly.run]
-- Documentation: [PLACEHOLDER: public docs URL]
-- Security whitepaper: [docs/security-whitepaper.md](docs/security-whitepaper.md)
-- Support: [PLACEHOLDER: support email, issue tracker, or community URL]
+CodeFly cannot access or record your session content. See [Commercial](docs/COMMERCIAL.md) and [Privacy](docs/PRIVACY.md) for details.
 
 ## Why CodeFly
 
-- Mobile first: built for checking and controlling coding sessions from a phone, not for replacing your editor.
-- Simple setup: install the host package, run `codefly`, scan a QR code.
-- Direct mode is free forever: connect your phone to your computer directly when the host is reachable.
-- Relay mode is optional: use CodeFly Relay when direct access is blocked by NAT, changing IP addresses, firewalls, or travel.
-- End-to-end encrypted: session traffic is encrypted between your phone and your host. The relay cannot read prompts, code, command output, diffs, or approval details.
+- Mobile workflow continuity: start and continue Codex or Claude Code sessions from your phone.
+- Native-feeling control: approvals, changed files, diffs, status, and session actions are designed for mobile use.
+- Local-first by default: use Direct Mode whenever your phone can reach your host.
+- Managed remote access when needed: use CodeFly Relay when you want reliable reachability without maintaining network infrastructure.
+- End-to-end encrypted: CodeFly cannot access data transmitted between your phone and host, and does not record transmitted content.
 - Provider-native: Codex and Claude Code keep running on your machine with their own accounts, config, tools, and session history.
 
-## How It Works
+## Documentation
+
+- [Quickstart](docs/QUICKSTART.md): install CodeFly Host and pair the mobile app with Direct or Relay.
+- [Security Whitepaper](docs/SECURITY_WHITEPAPER.md): end-to-end encryption, pairing, Relay forwarding, and security boundaries.
+- [Self-Hosted Relay](docs/SELF_HOSTED_RELAY.md): use Direct Mode over your own VPN, TCP proxy, tunnel, or private network instead of CodeFly Relay.
+- [Advanced Configuration](docs/ADVANCED.md): host settings and environment variables for advanced setups.
+- [Commercial Model](docs/COMMERCIAL.md): Direct free forever, Relay subscription tiers, trials, and availability.
+- [Privacy](docs/PRIVACY.md): what data is processed, what is not stored, and how data deletion should work.
+
+## How CodeFly Works
 
 ```text
 CodeFly Mobile App <-> CodeFly Host <-> Codex / Claude Code
 ```
 
-With direct mode, the mobile app connects to the host over the network and uses CodeFly's encrypted frame protocol.
+CodeFly Host runs on your computer and talks to Codex or Claude Code locally. The mobile app connects to CodeFly Host, so you can create and continue coding sessions from your phone while the provider tools remain on your machine.
 
-```text
-Phone <==== end-to-end encrypted direct connection ====> Host
-```
+There are three ways to make the phone reach the host:
 
-With relay mode, the phone and host both connect out to CodeFly Relay. The relay forwards encrypted frames but does not decrypt session content.
+- Direct: the phone reaches the host on a local or private network.
+- Self-hosted reachability: you provide a VPN, TCP proxy, tunnel, or private overlay, and CodeFly still uses Direct Mode.
+- CodeFly Relay: the phone and host both connect outward to CodeFly Relay for managed remote reachability.
 
-```text
-Phone <==== encrypted app frames ====> CodeFly Relay <==== encrypted app frames ====> Host
-```
+In every mode, CodeFly's session traffic is protected between the mobile app and host. CodeFly Relay is a forwarding service, not a place where session content is decrypted or recorded.
 
-[PLACEHOLDER: simple architecture diagram for direct and relay modes]
-
-## Direct Mode
-
-Direct mode is the simplest path when your phone can reach your computer on the network.
-
-- Free forever.
-- No CodeFly account required.
-- Uses the same end-to-end encrypted application frames as relay mode.
-- Best for local Wi-Fi, VPN, private network overlays, or any setup where your phone can reach the host address.
-
-Default direct port:
-
-```text
-7788
-```
-
-If your direct address changes, run `codefly` again and create a new QR code.
-
-## Relay Mode
-
-Relay mode is for the cases where direct networking is annoying or impossible.
-
-- Your phone and host both connect out to CodeFly Relay.
-- No port forwarding is required.
-- The relay routes encrypted frames and host presence.
-- The relay cannot decrypt session content.
-- Relay access is billed by the number of subscribed hosts.
-
-Relay is useful when your computer is behind NAT, has no stable public IP address, is on a restrictive network, or needs to be reachable while you are away.
-
-## Pricing Model
-
-CodeFly's business model is intentionally simple:
-
-- Direct connections are free forever.
-- Relay connections are paid because CodeFly runs the always-available routing service.
-- Relay subscriptions are based on the number of host computers you want to keep connected.
-
-[PLACEHOLDER: pricing page URL]
+[PLACEHOLDER: simple architecture diagram for Direct, self-hosted reachability, and CodeFly Relay]
 
 ## Supported Agents
 
@@ -116,19 +87,7 @@ CodeFly Host currently supports:
 - Codex
 - Claude Code
 
-Both providers run locally on your computer. CodeFly does not replace their official desktop, terminal, or IDE experiences. It gives you a phone control surface for the moments when you are away from your keyboard.
-
-## Advanced Configuration
-
-For most users, the interactive `codefly` menu is enough.
-
-Advanced users can configure the host with environment variables:
-
-- `HOST_CLIENT_PORT`: direct mode port, default `7788`.
-- `HOST_CLIENT_DIRECT_PUBLIC_HOST`: host name or IP address shown in direct pairing QR codes.
-- `HOST_CLIENT_WORKSPACE_DIR`: default workspace root.
-- `HOST_CLIENT_ADAPTER`: `multi`, `codex`, or `claude`.
-- `RELAY_URL`: custom relay URL for relay pairing.
+Both providers run locally on your computer. CodeFly does not replace their official desktop, terminal, or IDE experiences. It gives you a phone-native control surface for the moments when you are away from your keyboard.
 
 ## License
 

@@ -1,0 +1,129 @@
+# Self-Hosted Relay
+
+This document explains how to avoid CodeFly Relay by using Direct Mode over your own network path, such as a VPN, TCP proxy, tunnel, or private overlay network.
+
+In CodeFly, this is best understood as self-hosted reachability: make the phone able to reach CodeFly Host directly, and keep using Direct Mode.
+
+[PLACEHOLDER: diagram showing Phone -> user-managed network path -> CodeFly Host]
+
+## Short Version
+
+CodeFly Direct Mode works over any network path where the mobile app can reach the host address and port.
+
+Examples:
+
+- local Wi-Fi
+- WireGuard
+- Tailscale
+- ZeroTier
+- corporate VPN
+- SSH TCP tunnel
+- Cloudflare Tunnel
+- ngrok
+- FRP
+- a user-managed TCP proxy
+
+Direct Mode remains free forever. CodeFly Relay is only needed when you want CodeFly to provide managed remote reachability.
+
+## What CodeFly Needs
+
+Direct Mode needs one thing:
+
+```text
+Phone can reach Host address + Host port
+```
+
+The default host port is:
+
+```text
+7788
+```
+
+The QR code should contain an address reachable from the phone. Configure it with:
+
+```bash
+HOST_CLIENT_DIRECT_PUBLIC_HOST=host.example.com
+HOST_CLIENT_PORT=7788
+```
+
+Then run:
+
+```bash
+codefly
+```
+
+Choose Direct pairing and scan the QR code.
+
+## Common Network Patterns
+
+### Local Network
+
+Use this when the phone and computer are on the same Wi-Fi or LAN.
+
+```text
+Phone -> Local Wi-Fi -> Host:7788
+```
+
+This is the simplest path and usually needs no extra configuration beyond allowing the host port through the local firewall.
+
+### VPN Or Private Overlay
+
+Use this when you want a private address that works across networks.
+
+```text
+Phone -> VPN / private overlay -> Host:7788
+```
+
+Set `HOST_CLIENT_DIRECT_PUBLIC_HOST` to the VPN or overlay address of the host.
+
+### TCP Tunnel Or Proxy
+
+Use this when you want a stable public address that forwards traffic to the host.
+
+```text
+Phone -> Tunnel hostname -> Host:7788
+```
+
+The tunnel or proxy must preserve the network path CodeFly needs for Direct Mode. If the proxy changes protocols, blocks long-lived connections, or rewrites traffic in a way the mobile app cannot use, Direct Mode may fail.
+
+## Security Notes
+
+CodeFly application frames are still end-to-end encrypted between the phone and host in Direct Mode. A VPN, proxy, tunnel, or overlay provider may observe network metadata such as source, destination, timing, and traffic volume, but it should not be able to read CodeFly application payloads.
+
+Do not expose the host port publicly unless you understand the network risk. Pairing still requires CodeFly's cryptographic device identity and auth token flow, but the host computer remains an important security boundary.
+
+## Support Boundary
+
+CodeFly can document the host settings needed for Direct Mode:
+
+- host address
+- host port
+- QR pairing
+- firewall basics
+- CodeFly Host logs
+
+CodeFly does not manage or troubleshoot third-party VPN, proxy, tunnel, firewall, router, or overlay infrastructure.
+
+## When To Use CodeFly Relay Instead
+
+Use CodeFly Relay when:
+
+- you do not want to configure VPNs, tunnels, or port forwarding
+- your network blocks inbound connections
+- your host changes networks often
+- you need a simpler setup for multiple hosts
+- you want managed host presence and remote reachability
+
+CodeFly Relay is paid because it uses CodeFly infrastructure. Direct Mode remains free when you bring your own reachable network path.
+
+## Placeholder Examples
+
+[PLACEHOLDER: Tailscale setup example]
+
+[PLACEHOLDER: WireGuard setup example]
+
+[PLACEHOLDER: SSH tunnel setup example]
+
+[PLACEHOLDER: Cloudflare Tunnel setup example]
+
+[PLACEHOLDER: ngrok or FRP setup example]
