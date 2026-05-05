@@ -29,7 +29,7 @@ If a Relay trial or subscription ends, Direct access continues to work. Local pr
 
 Students, educators, and project contributors may contact us for free Relay access.
 
-[PLACEHOLDER: contact email or application form URL]
+Contact `codefly@babatech.cn`.
 
 ## Availability
 

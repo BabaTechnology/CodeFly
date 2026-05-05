@@ -4,7 +4,15 @@ This document explains how to avoid CodeFly Relay by using Direct Mode over your
 
 In CodeFly, this is best understood as self-hosted reachability: make the phone able to reach CodeFly Host directly, and keep using Direct Mode.
 
-[PLACEHOLDER: diagram showing Phone -> user-managed network path -> CodeFly Host]
+```mermaid
+flowchart LR
+  Phone["CodeFly Mobile App"]
+  Path["User-managed network path<br/>VPN / tunnel / TCP proxy / private overlay"]
+  Host["CodeFly Host<br/>listening on configured address and port"]
+  Providers["Codex / Claude Code"]
+
+  Phone -->|"Direct Mode traffic"| Path -->|"forwarded TCP reachability"| Host --> Providers
+```
 
 Self-hosted reachability is your own network setup. CodeFly does not provide extra support for third-party VPN, tunnel, proxy, firewall, router, or overlay configuration. The CodeFly side is intentionally simple: once the phone can reach the host address and port, configure that address in the host menu and pair with Direct Mode.
 
@@ -137,14 +145,16 @@ Use CodeFly Relay when:
 
 CodeFly Relay is paid because it uses CodeFly infrastructure. Direct Mode remains free when you bring your own reachable network path.
 
-## Placeholder Examples
+## Network Setup Notes
 
-[PLACEHOLDER: Tailscale setup example]
+CodeFly does not require a specific tunnel or VPN product. The network path only needs to make the phone reach the host address and port that CodeFly advertises in Direct Mode.
 
-[PLACEHOLDER: WireGuard setup example]
+Common approaches:
 
-[PLACEHOLDER: SSH tunnel setup example]
+- Tailscale or another private overlay: install it on the phone and host, confirm the phone can reach the host's overlay IP or DNS name, then set that value as `Host address`.
+- WireGuard or another VPN: connect both devices to the same VPN, allow traffic to the host's CodeFly port, then use the host's VPN address as `Host address`.
+- SSH tunnel: forward a stable local or remote TCP endpoint to the host's CodeFly port, then advertise the endpoint the phone can reach.
+- Cloudflare Tunnel or another managed tunnel: expose a TCP-compatible endpoint that forwards to the host's CodeFly port, then advertise the tunnel hostname.
+- ngrok, FRP, or another TCP proxy: forward a public TCP address to the host's CodeFly port, then advertise the proxy hostname or address.
 
-[PLACEHOLDER: Cloudflare Tunnel setup example]
-
-[PLACEHOLDER: ngrok or FRP setup example]
+After the network path works, run `codefly`, open `Manage local direct connection`, then `Manage service address and port`. Set `Listen addresses` to the local interface that receives the traffic and set `Host address` to the address the phone can actually reach.

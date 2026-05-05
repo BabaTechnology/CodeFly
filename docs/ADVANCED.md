@@ -148,9 +148,7 @@ When CodeFly Relay is used, removing a binding from either the host side or the 
 
 ### Remove A Host From The Mobile App
 
-In the mobile app, remove the paired host from the host list or host settings. This removes the mobile-side pairing record from the phone.
-
-[PLACEHOLDER: exact mobile UI path once finalized]
+In the mobile app, go to the host list, swipe the host card, then choose `Delete`. This removes the mobile-side pairing record from the phone.
 
 ### Binding And Relay Seat Rules
 
@@ -162,4 +160,4 @@ Relay subscriptions are counted per end user by bindable host seats. If multiple
 
 To fully reset a host, stop CodeFly Host and remove the host data directory configured by `HOST_CLIENT_DATA_DIR`.
 
-[PLACEHOLDER: document default host data directory paths for macOS, Linux, and Windows]
+If `HOST_CLIENT_DATA_DIR` is not set, the default host data directory is `./data` under the directory where `codefly` is launched. This default is the same on macOS, Linux, and Windows because it is relative to the current working directory.

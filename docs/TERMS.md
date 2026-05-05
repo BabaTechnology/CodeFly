@@ -1,12 +1,10 @@
 # Terms of Service
 
-Version: draft 0.1
+Version: 1.0
 
-Effective date: [PLACEHOLDER: effective date]
+Last updated: May 5, 2026
 
-[PLACEHOLDER: replace this draft with final legal terms before public launch. This document is product-facing text and should be reviewed by legal counsel.]
-
-These Terms govern access to and use of CodeFly Host, CodeFly mobile apps, CodeFly Relay, documentation, support, and related services provided by [PLACEHOLDER: company legal name] ("CodeFly", "we", "us", or "our").
+These Terms of Service ("Terms") govern access to and use of CodeFly Host, CodeFly mobile apps, CodeFly Relay, the CodeFly website, documentation, support, and related services provided by Shenzhen Baba Technology Co., Ltd. ("CodeFly", "we", "us", or "our").
 
 By using CodeFly, you agree to these Terms. If you use CodeFly on behalf of an organization, you represent that you have authority to accept these Terms for that organization.
 
@@ -26,7 +24,7 @@ Provider tools such as Codex and Claude Code are third-party tools. Their own ac
 
 Direct Mode does not require a CodeFly account or OAuth sign-in.
 
-CodeFly Relay may require sign-in with a supported OAuth provider, such as Apple, Google, GitHub, WeChat, or another provider shown in the app. OAuth sign-in is used to associate Relay entitlements with the same user across that user's own devices.
+CodeFly Relay may require sign-in with a supported OAuth provider shown in the app. OAuth sign-in is used to associate Relay entitlements with the same user across that user's own devices.
 
 If you purchase Relay access without OAuth sign-in, the purchase may be available only on the device that made the purchase, depending on the payment platform and app behavior.
 
@@ -44,7 +42,7 @@ CodeFly may provide documentation and product settings that help you configure D
 
 You may use Direct Mode through your own VPN, TCP proxy, SSH tunnel, private overlay, reverse proxy, or similar network setup.
 
-Self-hosted reachability is your own infrastructure and responsibility. CodeFly does not operate, monitor, secure, or troubleshoot third-party or user-managed network infrastructure, although the Direct Mode setup itself is intended to remain simple.
+Self-hosted reachability is your own infrastructure and responsibility. CodeFly does not operate, monitor, secure, or troubleshoot third-party or user-managed network infrastructure, although the CodeFly side of Direct Mode is intended to remain simple.
 
 ## CodeFly Relay
 
@@ -52,7 +50,7 @@ CodeFly Relay is an optional managed service. It exists to solve practical reach
 
 Relay access is tied to Relay entitlements and subscribed host seats. A Relay host seat represents one computer that can stay reachable through CodeFly Relay.
 
-Relay traffic remains encrypted between the phone and host. CodeFly cannot access any data transmitted between the host and phone, and does not record transmitted content. The Relay may process operational metadata needed for routing, subscription checks, abuse prevention, reliability, billing, notifications, and support. See the [Security Whitepaper](SECURITY_WHITEPAPER.md) and [Privacy](PRIVACY.md) for details.
+Relay traffic remains encrypted between the phone and host. CodeFly cannot access any data transmitted between the host and phone, and does not record transmitted content. The Relay may process operational metadata needed for routing, subscription checks, abuse prevention, reliability, billing, notifications, and support. See the [Security Whitepaper](SECURITY_WHITEPAPER.md) and [Privacy Policy](PRIVACY.md) for details.
 
 We will do our best to keep CodeFly Relay reliable and available, but we do not guarantee uninterrupted access unless a separate written agreement says otherwise. Relay server locations, routing, capacity, and configuration may change over time.
 
@@ -60,11 +58,11 @@ We will do our best to keep CodeFly Relay reliable and available, but we do not 
 
 CodeFly Relay may be offered through paid subscriptions, trials, promotional access, or special free access.
 
-Prices, taxes, renewal timing, cancellation rules, refund eligibility, trial availability, and billing notices are shown by the applicable payment platform, such as the App Store or Google Play, according to your platform, region, currency, and store rules. We do not list fixed prices in this documentation.
+Prices, taxes, renewal timing, cancellation rules, refund eligibility, trial availability, and billing notices are shown by the applicable payment platform according to your platform, region, currency, and store rules. We do not list fixed prices in this documentation.
 
 CodeFly is intended to provide a 7-day free Pro trial by default where supported by the payment platform. Exact trial behavior is determined by the payment platform shown in the app.
 
-Students, educators, and project contributors may contact us for special free Relay access. We may grant, modify, or revoke special access at our discretion.
+Students, educators, and project contributors may contact `codefly@babatech.cn` for special free Relay access. We may grant, modify, or revoke special access at our discretion.
 
 If a Relay trial or subscription ends, Direct Mode can continue to work when your phone can reach the host through your own network path. Ending Relay access does not remove local provider sessions or host data from your computer.
 
@@ -98,7 +96,7 @@ You are responsible for:
 
 If either endpoint is compromised, CodeFly cannot protect session content from that compromised endpoint.
 
-## Updates
+## Updates And Changes To The Service
 
 CodeFly Host and the mobile apps may receive updates, including security fixes, compatibility fixes, and service changes.
 
@@ -108,7 +106,7 @@ We may change, suspend, or discontinue features when needed for security, reliab
 
 ## Privacy And Data
 
-CodeFly's data practices are described in the [Privacy](PRIVACY.md) document.
+CodeFly's data practices are described in the [Privacy Policy](PRIVACY.md).
 
 You may request deletion of OAuth-linked profile, Relay, and device data through documented product flows or support channels, subject to retention needed for billing, legal compliance, abuse prevention, backups, support records, and operational integrity.
 
@@ -116,7 +114,7 @@ Local host data and provider sessions remain on your computer and are controlled
 
 ## Support
 
-Support is available at [https://codefly.run/support](https://codefly.run/support).
+Support is available at [https://codefly.run/support](https://codefly.run/support) or by email at `codefly@babatech.cn`.
 
 We may provide documentation, troubleshooting guidance, and product support, but we do not guarantee support for user-managed VPNs, tunnels, proxies, firewalls, DNS, routers, third-party providers, or unsupported operating environments.
 
@@ -130,7 +128,7 @@ Your use of third-party services may be governed by separate terms and privacy p
 
 CodeFly software, services, documentation, branding, and related materials are owned by CodeFly or its licensors, except for open source components and third-party materials.
 
-Open source licensing for this repository is described in the [License](../LICENSE). The license for the public CodeFly Host code does not grant rights to CodeFly's hosted Relay service, mobile app distribution, trademarks, or commercial infrastructure.
+The public CodeFly Host code is licensed separately under the Apache License 2.0. That license does not grant rights to CodeFly's hosted Relay service, mobile app distribution, trademarks, or commercial infrastructure.
 
 You retain ownership of your code, prompts, session content, and files. CodeFly does not claim ownership of the content you transmit between your phone and host.
 
@@ -146,7 +144,7 @@ Provider tools may generate incorrect, unsafe, or unwanted outputs. You are resp
 
 To the maximum extent permitted by law, CodeFly and its affiliates, officers, employees, contractors, and suppliers will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for lost profits, lost revenue, lost data, business interruption, security incidents caused by compromised endpoints, or third-party service failures.
 
-To the maximum extent permitted by law, CodeFly's total liability for any claim related to the service will not exceed the amount you paid to CodeFly for Relay access during the twelve months before the claim, or [PLACEHOLDER: minimum statutory amount], whichever is greater.
+To the maximum extent permitted by law, CodeFly's total liability for any claim related to the service will not exceed the amount you paid to CodeFly for Relay access during the twelve months before the claim.
 
 Some jurisdictions do not allow certain limitations, so some of these limitations may not apply to you.
 
@@ -168,14 +166,6 @@ We may update these Terms as the product, infrastructure, legal requirements, or
 
 If changes are material, we will take reasonable steps to notify users through the app, website, documentation, or another appropriate channel. Continued use after updated Terms become effective means you accept the updated Terms.
 
-## Governing Law
-
-[PLACEHOLDER: governing law and venue]
-
 ## Contact
 
-For questions about these Terms, contact:
-
-[PLACEHOLDER: legal contact email]
-
-[PLACEHOLDER: company legal name and mailing address]
+For questions about these Terms, contact `codefly@babatech.cn`.

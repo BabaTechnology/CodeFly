@@ -97,7 +97,19 @@ CodeFly Mobile App <-> CodeFly Host <-> Codex / Claude Code
 
 CodeFly Host runs on your computer and talks to Codex or Claude Code locally. The mobile app connects to the host, so the provider tools remain on your machine while your phone becomes a mobile control surface.
 
-[PLACEHOLDER: simple architecture diagram for Direct, self-hosted reachability, and CodeFly Relay]
+```mermaid
+flowchart LR
+  Phone["CodeFly Mobile App"]
+  Host["CodeFly Host<br/>your computer"]
+  Providers["Codex / Claude Code<br/>local provider tools"]
+  Relay["CodeFly Relay<br/>managed reachability"]
+  UserNetwork["Self-hosted path<br/>VPN / tunnel / proxy"]
+
+  Phone -->|"Direct<br/>local Wi-Fi, VPN, public IP, DNS"| Host
+  Phone -->|"Self-hosted reachability"| UserNetwork --> Host
+  Phone -->|"CodeFly Relay"| Relay --> Host
+  Host --> Providers
+```
 
 ## 🤖 Supported Agents
 

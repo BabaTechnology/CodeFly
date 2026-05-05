@@ -1,12 +1,27 @@
 # CodeFly Host Security Whitepaper
 
-Version: draft 0.1
+Version: 1.0
+
+Last updated: May 5, 2026
 
 CodeFly is designed around a simple rule: coding session content should be readable only by the user's phone and the user's own host computer.
 
 This document explains the security model for CodeFly Host, including Direct connections, Relay connections, pairing, encryption, what CodeFly servers can see, and what they cannot see.
 
-[PLACEHOLDER: high-level architecture diagram showing Mobile App, CodeFly Host, CodeFly Relay, Codex, and Claude Code]
+```mermaid
+flowchart LR
+  Phone["CodeFly Mobile App"]
+  Host["CodeFly Host<br/>runs on user's computer"]
+  Relay["CodeFly Relay<br/>optional encrypted forwarding"]
+  Codex["Codex"]
+  Claude["Claude Code"]
+
+  Phone -->|"Direct Mode<br/>encrypted phone-host frames"| Host
+  Phone -->|"Relay Mode<br/>encrypted phone-host frames"| Relay
+  Relay -->|"forwards encrypted frames<br/>no plaintext session content"| Host
+  Host -->|"local provider control"| Codex
+  Host -->|"local provider control"| Claude
+```
 
 ## Summary
 
