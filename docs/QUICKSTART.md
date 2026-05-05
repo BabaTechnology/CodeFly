@@ -1,8 +1,6 @@
 # ⚡ Quickstart
 
-This guide shows how to install CodeFly Host and bind it to the CodeFly mobile app.
-
-[PLACEHOLDER: short setup video or GIF showing install, `codefly`, pairing, and the first mobile-controlled session]
+This guide shows how to install CodeFly Host, configure the address your phone can reach, and bind it to the CodeFly mobile app.
 
 ## What You Need
 
@@ -135,8 +133,6 @@ Pairing steps:
 4. Choose `2. Add a new bound direct client`.
 5. In the CodeFly mobile app, tap the `+` button in the top-right corner to add a new host connection.
 6. Scan the Direct QR code and wait for the CLI to show the successful pairing message.
-
-[PLACEHOLDER: mobile screenshot showing the top-right `+` button and add-host flow]
 
 Direct Mode does not require OAuth sign-in and is free forever.
 

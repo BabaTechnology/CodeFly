@@ -27,9 +27,9 @@
   </a>
 </p>
 
-CodeFly lets you start, resume, and steer a complete vibe coding workflow from iOS or Android while Codex and Claude Code keep running on your own computer. It is built for a smooth, close-to-native mobile experience: create tasks, continue sessions, approve actions, inspect changed files, review diffs, and stay connected through Direct, self-hosted, or CodeFly Relay paths.
+CodeFly lets you start new tasks, resume existing sessions, approve actions, inspect changed files, review diffs, and keep a complete vibe coding flow moving from iOS or Android while Codex and Claude Code keep running on your own computer.
 
-[PLACEHOLDER: hero screenshot showing the mobile app controlling a running Codex or Claude Code session]
+CodeFly is not a cloud IDE. It is a mobile control surface for provider sessions that already belong to your host machine, with Direct, self-hosted reachability, and CodeFly Relay connection modes.
 
 ## 📲 Install
 
@@ -78,6 +78,17 @@ CodeFly cannot access any data transmitted between the host and phone, and does 
 - Choose Direct, self-hosted reachability, or CodeFly Relay based on your network.
 - Configure Direct with IPv4, IPv6, or DNS host addresses, plus one or more local listener addresses.
 - Keep provider tools, accounts, configuration, workspaces, and session history on your own machine.
+
+## 🧩 Product Model
+
+CodeFly keeps the setup simple:
+
+1. Download CodeFly on iOS or Android.
+2. Install `codefly-host` on the computer where Codex or Claude Code is installed and signed in, or configured with a usable API key.
+3. Run `codefly`, choose Direct or Relay pairing, then tap the top-right `+` button in the mobile app to add the host.
+4. Start a new session or continue an existing host session from mobile.
+
+Direct Mode and self-hosted reachability are free forever because they do not consume CodeFly Relay infrastructure. CodeFly Relay is paid because it provides managed servers and bandwidth for reliable reachability.
 
 ## 📚 Documentation
 
