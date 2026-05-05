@@ -1,0 +1,70 @@
+{
+  "name": "codefly-host",
+  "version": "0.1.1",
+  "description": "CodeFly host daemon for Codex and Claude Code.",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "bin": {
+    "codefly": "dist/cli.js"
+  },
+  "types": "dist/index.d.ts",
+  "homepage": "https://github.com/BabaTechnology/CodeFly#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BabaTechnology/CodeFly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BabaTechnology/CodeFly/issues"
+  },
+  "keywords": [
+    "codefly",
+    "codex",
+    "claude-code",
+    "remote-agent",
+    "cli"
+  ],
+  "files": [
+    "dist",
+    "docs",
+    ".env.example",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('src/cli-i18n.json','dist/cli-i18n.json')\"",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prepack": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js",
+    "pack:dry-run": "npm pack --dry-run",
+    "release:check": "npm run clean && npm run typecheck && npm run build && npm run pack:dry-run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "overrides": {
+    "@anthropic-ai/sdk": "^0.92.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.119",
+    "@anthropic-ai/claude-code": "^2.1.119",
+    "@iarna/toml": "^2.2.5",
+    "@openai/codex": "^0.128.0",
+    "better-sqlite3": "^12.9.0",
+    "fastify": "^5.8.5",
+    "qrcode-terminal": "^0.12.0",
+    "selfsigned": "^5.5.0",
+    "systeminformation": "^5.31.5",
+    "tweetnacl": "^1.0.3",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^25.6.0",
+    "@types/ws": "^8.5.14",
+    "typescript": "^6.0.3"
+  }
+}
