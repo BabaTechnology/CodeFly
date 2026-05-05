@@ -16,7 +16,18 @@ HOST_CLIENT_DIRECT_PUBLIC_HOST=host.example.com
 - `HOST_CLIENT_PORT`: Direct Mode port, default `7788`.
 - `HOST_CLIENT_DIRECT_PUBLIC_HOST`: host name or IP address shown to the mobile app during Direct pairing.
 
-`HOST_CLIENT_DIRECT_PUBLIC_HOST` should be reachable from the phone. It can be a local IP address, VPN address, tunnel hostname, private overlay address, or other user-managed network endpoint.
+`HOST_CLIENT_DIRECT_PUBLIC_HOST` should be reachable from the phone. It can be an IPv4 address, IPv6 address, DNS name, local IP address, VPN address, tunnel hostname, private overlay address, or other user-managed network endpoint. Enter only the host, without a protocol, path, or port.
+
+`HOST_CLIENT_BIND` controls where the host listens locally. It accepts IPv4 addresses, IPv6 addresses, and local hostnames that resolve to this computer. Common examples:
+
+```bash
+HOST_CLIENT_BIND=0.0.0.0
+HOST_CLIENT_BIND=0.0.0.0, ::
+HOST_CLIENT_BIND=192.168.1.20, 100.80.12.34
+HOST_CLIENT_BIND=my-host.local, 0.0.0.0, ::
+```
+
+Wildcard listeners are listen-only values. `0.0.0.0`, `::`, `127.0.0.1`, and `localhost` are skipped as QR addresses because a phone cannot use them to identify the host from another device.
 
 The same settings can be managed from the interactive menu:
 
@@ -25,7 +36,7 @@ The same settings can be managed from the interactive menu:
 3. Manage service address and port
 ```
 
-This is one of the most important Direct Mode settings. The host must listen on the correct local interface, and the QR code must advertise an address the phone can reach. When creating a Direct binding, CodeFly lists usable candidates from the configured public host, configured listen addresses, and detected local network interfaces. Choose the address that is reachable from the phone for that pairing.
+This is one of the most important Direct Mode settings. The host must listen on the correct local interface, and the QR code must advertise an address the phone can reach. When creating a Direct binding, CodeFly lists usable candidates from the configured public host, configured listen addresses, and detected local network interfaces. Choose the IPv4 address, IPv6 address, or DNS name that is reachable from the phone for that pairing.
 
 ## Host Data And Workspace
 

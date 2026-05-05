@@ -101,11 +101,11 @@ Configuration saved.
 
 Fields:
 
-- `Host address`: the address written into the Direct QR code by default. Use the LAN IP, VPN IP, tunnel hostname, private overlay address, or public hostname that the phone can actually reach.
-- `Listen addresses`: local interfaces where CodeFly Host accepts Direct TCP connections. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or a comma-separated list such as `0.0.0.0, ::`.
+- `Host address`: the address written into the Direct QR code by default. It supports IPv4 addresses, IPv6 addresses, and DNS names. Use the LAN IP, VPN IP, tunnel hostname, private overlay address, or public hostname that the phone can actually reach. Enter only the host, without `codefly-tcp://`, a path, or a port.
+- `Listen addresses`: local interfaces where CodeFly Host accepts Direct TCP connections. It supports IPv4 addresses, IPv6 addresses, and local hostnames that resolve to this computer. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or a comma-separated list such as `0.0.0.0, ::`, `192.168.1.20, 100.80.12.34`, or `0.0.0.0, ::, my-host.local`.
 - `Port`: the Direct listener port. The default is `7788`.
 
-When you create a Direct binding, the CLI also lists usable addresses from the configured host, configured listen addresses, and detected local network interfaces. Choose the address the phone can reach; that selected address is encoded into this pairing QR code.
+When you create a Direct binding, the CLI also lists usable addresses from the configured host, configured listen addresses, and detected local network interfaces. Choose the address the phone can reach; that selected address is encoded into this pairing QR code. Wildcard and loopback listen addresses such as `0.0.0.0`, `::`, `127.0.0.1`, and `localhost` are useful for listening but are skipped as QR addresses because a phone cannot use them to reach the host.
 
 ```text
 Choose the address to encode in this direct binding QR code.
@@ -113,6 +113,18 @@ Choose the address to encode in this direct binding QR code.
 2. 100.80.12.34 (en0 IPv4)
 Address number [1]: 2
 QR address: codefly-tcp://100.80.12.34:7788
+```
+
+IPv6 and DNS names are also valid:
+
+```text
+Host address [192.168.1.20]: 2001:db8::20
+Listen addresses [0.0.0.0]: 0.0.0.0, ::
+```
+
+```text
+Host address [192.168.1.20]: host.example.com
+Listen addresses [0.0.0.0]: my-host.local, 0.0.0.0, ::
 ```
 
 Pairing steps:

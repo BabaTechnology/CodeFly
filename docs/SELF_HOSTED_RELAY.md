@@ -44,7 +44,7 @@ The default host port is:
 The QR code should contain an address reachable from the phone. Configure it with:
 
 ```bash
-HOST_CLIENT_BIND=0.0.0.0
+HOST_CLIENT_BIND=0.0.0.0, ::
 HOST_CLIENT_DIRECT_PUBLIC_HOST=host.example.com
 HOST_CLIENT_PORT=7788
 ```
@@ -101,10 +101,11 @@ You can also configure this interactively:
 This setting must be correct:
 
 - `Host address` should be the tunnel, VPN, proxy, overlay, LAN, or public address reachable from the phone.
-- `Listen addresses` should include the local interface that receives the forwarded traffic. `0.0.0.0` listens on all IPv4 interfaces, `::` listens on all IPv6 interfaces, and comma-separated values are supported.
+- `Host address` supports IPv4, IPv6, and DNS names. Enter only the host, without protocol, path, or port.
+- `Listen addresses` should include the local interface that receives the forwarded traffic. IPv4 addresses, IPv6 addresses, and local hostnames are supported. `0.0.0.0` listens on all IPv4 interfaces, `::` listens on all IPv6 interfaces, and comma-separated values are supported.
 - `Port` must match the port your network path forwards to the host.
 
-When creating a Direct binding, CodeFly lists configured addresses and detected local network interface addresses so you can choose the address to encode into the QR code.
+When creating a Direct binding, CodeFly lists configured addresses and detected local network interface addresses so you can choose the address to encode into the QR code. Listen-only values such as `0.0.0.0`, `::`, `127.0.0.1`, and `localhost` are skipped as QR addresses.
 
 ## Security Notes
 

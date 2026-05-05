@@ -75,6 +75,7 @@ CodeFly cannot access any data transmitted between the host and phone, and does 
 - Resume existing host sessions that are already available on the computer.
 - Use a complete mobile vibe coding workflow: prompts, approvals, files, diffs, status, and interruptions.
 - Choose Direct, self-hosted reachability, or CodeFly Relay based on your network.
+- Configure Direct with IPv4, IPv6, or DNS host addresses, plus one or more local listener addresses.
 - Keep provider tools, accounts, configuration, workspaces, and session history on your own machine.
 
 ## 📚 Documentation
