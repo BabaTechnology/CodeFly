@@ -27,10 +27,8 @@ flowchart LR
 
 - CodeFly Host runs on the user's computer, next to Codex and Claude Code.
 - The CodeFly mobile app connects to the host through Direct Mode or CodeFly Relay.
-- Direct Mode is free forever and does not require OAuth sign-in.
-- CodeFly Relay is optional and is billed by subscribed host seats.
 - Communication between the mobile app and host is encrypted with a host-side certificate and host-controlled security material.
-- CodeFly cannot access data transmitted between the phone and host, and does not record transmitted content.
+- Relay servers receive routing metadata and encrypted frames, not plaintext session content.
 
 ## Security Goals
 
@@ -44,7 +42,7 @@ CodeFly Host is built to protect:
 - diffs and Git information returned through CodeFly
 - provider runtime details that travel inside encrypted app frames
 
-The Relay service is designed so that a server-side data exposure does not reveal plaintext coding session content.
+The Relay service is designed so that a server-side exposure does not reveal plaintext coding session content.
 
 ## System Components
 
@@ -59,7 +57,7 @@ CodeFly has four security-relevant components:
 - CodeFly Relay: optional routing service for networks where Direct access is not practical.
 - Provider tools: Codex and Claude Code, installed and authenticated on the user's computer.
 
-CodeFly is not a remote IDE. Provider tools continue to run locally, with their own accounts, configuration, sandbox behavior, and session history.
+Provider tools continue to run locally, with their own accounts, configuration, sandbox behavior, and session history.
 
 ## Connection Modes
 
@@ -95,7 +93,7 @@ CodeFly Relay properties:
 - The Relay routes encrypted frames by host seat and device identity.
 - The Relay forwards encrypted traffic and cannot access transmitted content.
 
-CodeFly Relay exists to solve practical networking problems: NAT, firewalls, changing IP addresses, and computers that need to be reachable while the user is away.
+CodeFly Relay exists for networks where Direct access is not practical.
 
 ## Cryptographic Design
 
@@ -103,7 +101,7 @@ CodeFly uses host-controlled transport security and public-key authenticated enc
 
 ### Host Certificate
 
-The secure connection between the mobile app and CodeFly Host uses a host-side certificate. By default, CodeFly Host generates and stores this certificate locally on the host computer. CodeFly does not issue, store, or have access to the host certificate private key.
+The secure connection between the mobile app and CodeFly Host uses a host-side certificate. By default, CodeFly Host generates and stores this certificate locally. CodeFly does not issue, store, or have access to the private key.
 
 The host certificate is independent from CodeFly Relay. When CodeFly Relay is used, the Relay forwards traffic between endpoints, but it does not receive the host certificate private key and cannot use it to decrypt host-phone communication.
 
@@ -320,12 +318,4 @@ CodeFly's end-to-end encryption protects application payloads between phone and 
 
 The strongest security boundary is between encrypted session content and the Relay service.
 
-## Commercial Model And Privacy Alignment
-
-CodeFly's pricing model follows the architecture:
-
-- Direct Mode is free forever because it does not consume CodeFly Relay infrastructure.
-- CodeFly Relay is paid because CodeFly operates the always-available routing service.
-- Relay plans are based on subscribed host seats.
-
-Users who can connect directly do not need to pay. Users who need reliable remote routing pay only for the hosts they connect through the Relay.
+For billing and retention details, see [Commercial Model](COMMERCIAL.md) and [Privacy Policy](PRIVACY.md).

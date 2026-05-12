@@ -4,7 +4,7 @@ Most users should use the interactive `codefly` menu. This document covers host 
 
 ## Direct Mode Settings
 
-Use these variables when the default Direct Mode address or port is not enough.
+Use these variables when the interactive menu is not enough or you need repeatable host configuration.
 
 ```bash
 HOST_CLIENT_BIND=0.0.0.0, ::
@@ -12,13 +12,13 @@ HOST_CLIENT_PORT=7788
 HOST_CLIENT_DIRECT_PUBLIC_HOST=host.example.com
 ```
 
-- `HOST_CLIENT_BIND`: comma-separated local listen addresses for the host service. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or explicit addresses for selected interfaces.
+- `HOST_CLIENT_BIND`: comma-separated local listen addresses. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or explicit addresses for selected interfaces.
 - `HOST_CLIENT_PORT`: Direct Mode port, default `7788`.
 - `HOST_CLIENT_DIRECT_PUBLIC_HOST`: host name or IP address shown to the mobile app during Direct pairing.
 
-`HOST_CLIENT_DIRECT_PUBLIC_HOST` should be reachable from the phone. It can be an IPv4 address, IPv6 address, DNS name, local IP address, VPN address, tunnel hostname, private overlay address, or other user-managed network endpoint. Enter only the host, without a protocol, path, or port.
+`HOST_CLIENT_DIRECT_PUBLIC_HOST` should be reachable from the phone. Enter only the host, without a protocol, path, or port.
 
-`HOST_CLIENT_BIND` controls where the host listens locally. It accepts IPv4 addresses, IPv6 addresses, and local hostnames that resolve to this computer. Common examples:
+`HOST_CLIENT_BIND` accepts IPv4 addresses, IPv6 addresses, and local hostnames that resolve to this computer. Common examples:
 
 ```bash
 HOST_CLIENT_BIND=0.0.0.0
@@ -36,7 +36,7 @@ The same settings can be managed from the interactive menu:
 3. Manage service address and port
 ```
 
-This is one of the most important Direct Mode settings. The host must listen on the correct local interface, and the QR code must advertise an address the phone can reach. When creating a Direct binding, CodeFly lists usable candidates from the configured public host, configured listen addresses, and detected local network interfaces. Choose the IPv4 address, IPv6 address, or DNS name that is reachable from the phone for that pairing.
+When creating a Direct binding, CodeFly lists usable candidates from the configured public host, configured listen addresses, and detected local network interfaces. Choose the IPv4 address, IPv6 address, or DNS name that is reachable from the phone for that pairing.
 
 ## Host Data And Workspace
 
@@ -68,17 +68,7 @@ CodeFly expects provider tools to be installed and signed in on the host compute
 
 ## Network Paths Without CodeFly Relay
 
-If you do not want to use CodeFly Relay, keep using Direct Mode over your own reachable network path.
-
-Examples:
-
-- VPN
-- private overlay
-- SSH TCP tunnel
-- reverse tunnel
-- user-managed TCP proxy
-
-See [Self-Hosted Relay](SELF_HOSTED_RELAY.md) for the recommended model.
+If you do not want to use CodeFly Relay, keep using Direct Mode over your own reachable network path, such as a VPN, private overlay, SSH TCP tunnel, reverse tunnel, or user-managed TCP proxy. See [Self-Hosted Relay](SELF_HOSTED_RELAY.md) for the recommended model.
 
 ## CodeFly Relay
 

@@ -1,6 +1,6 @@
 # ⚡ Quickstart
 
-This guide shows how to install CodeFly Host, configure the address your phone can reach, and bind it to the CodeFly mobile app.
+This guide covers the normal path: install CodeFly Host, choose Direct or Relay, bind the phone, and start a session.
 
 ## What You Need
 
@@ -67,9 +67,7 @@ Main menu options:
 
 ## Choose A Connection Mode
 
-Use Direct Mode when your phone can reach your host. Use CodeFly Relay when you want managed remote reachability without configuring your own network path.
-
-If you prefer to bring your own VPN, TCP proxy, tunnel, or private overlay, read [Self-Hosted Relay](SELF_HOSTED_RELAY.md).
+Use Direct Mode when the phone can reach the host address and port. Use CodeFly Relay when you want managed reachability without configuring your own network path. If you bring your own VPN, TCP proxy, tunnel, or private overlay, see [Self-Hosted Relay](SELF_HOSTED_RELAY.md).
 
 ## Direct Mode
 
@@ -97,13 +95,13 @@ Port [7788]: 7788
 Configuration saved.
 ```
 
-Fields:
+Key fields:
 
 - `Host address`: the address written into the Direct QR code by default. It supports IPv4 addresses, IPv6 addresses, and DNS names. Use the LAN IP, VPN IP, tunnel hostname, private overlay address, or public hostname that the phone can actually reach. Enter only the host, without `codefly-tcp://`, a path, or a port.
 - `Listen addresses`: local interfaces where CodeFly Host accepts Direct TCP connections. It supports IPv4 addresses, IPv6 addresses, and local hostnames that resolve to this computer. Use `0.0.0.0` for all IPv4 interfaces, `::` for all IPv6 interfaces, or a comma-separated list such as `0.0.0.0, ::`, `192.168.1.20, 100.80.12.34`, or `0.0.0.0, ::, my-host.local`.
 - `Port`: the Direct listener port. The default is `7788`.
 
-When you create a Direct binding, the CLI also lists usable addresses from the configured host, configured listen addresses, and detected local network interfaces. Choose the address the phone can reach; that selected address is encoded into this pairing QR code. Wildcard and loopback listen addresses such as `0.0.0.0`, `::`, `127.0.0.1`, and `localhost` are useful for listening but are skipped as QR addresses because a phone cannot use them to reach the host.
+When you create a Direct binding, the CLI lists usable addresses from this configuration and detected network interfaces. Choose the address the phone can reach. Wildcard and loopback listen addresses are useful for listening, but they are skipped as QR candidates because a phone cannot use them to identify the host.
 
 ```text
 Choose the address to encode in this direct binding QR code.
@@ -120,11 +118,6 @@ Host address [192.168.1.20]: 2001:db8::20
 Listen addresses [0.0.0.0]: 0.0.0.0, ::
 ```
 
-```text
-Host address [192.168.1.20]: host.example.com
-Listen addresses [0.0.0.0]: my-host.local, 0.0.0.0, ::
-```
-
 Pairing steps:
 
 1. Run `codefly` on the computer.
@@ -138,15 +131,7 @@ Direct Mode does not require OAuth sign-in and is free forever.
 
 ## CodeFly Relay
 
-Use CodeFly Relay when Direct networking is inconvenient or unavailable.
-
-CodeFly Relay is useful when:
-
-- the host is behind NAT
-- the host does not have a stable public IP address
-- port forwarding is not available
-- you want the host reachable while traveling
-- the network blocks inbound connections to the host
+Use CodeFly Relay when Direct networking is inconvenient or unavailable, for example behind NAT, unstable public IP addresses, blocked inbound connections, or travel networks.
 
 Before Relay binding, make sure the mobile app has an available Relay trial or subscription. CodeFly supports OAuth sign-in with providers such as Apple, Google, GitHub, or WeChat. Without OAuth sign-in, a purchase can only be used on the device that made the purchase. After sign-in, the same Relay entitlement can be shared across the user's own devices.
 
@@ -161,7 +146,7 @@ Steps:
 7. The host receives a Relay credential and opens an outbound connection.
 8. The mobile app shows the host when the Relay binding is active.
 
-CodeFly Relay requires a subscribed host seat. Multiple users and multiple mobile devices may bind the same host, but Relay entitlement is counted per end user. If two users bind the same host through Relay, each user needs their own available host seat. The same signed-in user can use their own devices to access the same bound host without consuming extra host seats.
+CodeFly Relay requires a subscribed host seat. The same signed-in user can access a bound host from their own devices without consuming extra seats; different users need their own Relay entitlement.
 
 ## Start A Session
 
@@ -175,8 +160,6 @@ After pairing:
 6. To start a new session, tap the new-session button in the top-right corner.
 
 From the phone, you can create tasks, send instructions, respond to approval prompts, inspect changed files and diffs, interrupt or continue running work, and switch between available local providers.
-
-Provider tools still run on your computer. CodeFly gives you a mobile control surface for those local sessions.
 
 ## Check For Updates
 
